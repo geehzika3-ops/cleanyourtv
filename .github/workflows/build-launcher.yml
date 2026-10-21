@@ -1,3 +1,4 @@
+
 name: Build CleanYourTV Launcher
 
 on:
@@ -5,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout repository
@@ -19,9 +20,23 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          accept-android-sdk-licenses: false
+
+      - name: Accept required Android SDK licenses
+        run: |
+          mkdir -p "$ANDROID_HOME/licenses"
+          printf '%s\n' \
+            '8933bad161af4178b1185d1a37fbf41ea5269c55' \
+            'd56f5187479451eabf01fb78af6dfcb131a6481e' \
+            '24333f8a63b6825ea9c5514f83c2829b004d1fee' \
+            > "$ANDROID_HOME/licenses/android-sdk-license"
 
       - name: Install Android SDK 34
-        run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
+        run: |
+          sdkmanager --install \
+            "platforms;android-34" \
+            "build-tools;34.0.0"
 
       - name: Build original launcher APK
         working-directory: launcher
@@ -33,3 +48,4 @@ jobs:
           name: CleanYourTV-Launcher-APK
           path: launcher/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
+          retention-days: 7
